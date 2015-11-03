@@ -25,7 +25,7 @@ int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
     char colourA, colourB;
     colourA = *argv[2];
     colourB = *(argv[2] + 1);
-
+    
     if (checkFile())
     {
         runPrograms();
@@ -47,7 +47,7 @@ bool checkFile(void)
         {
             if (dir->d_type == DT_REG)
             {
-                if (*(dir->d_name) == 'A' || *(dir->d_name) == 'B')
+                if ((*(dir->d_name) == 'A' || *(dir->d_name) == 'B')&&(*(dir->d_name+1)!='.'))
                     counter++;
                 //printf("%s\n", dir->d_name);
             }
@@ -62,10 +62,11 @@ bool checkFile(void)
 
 void runPrograms()
 {
+    char a;
     pid_t pid;
     int rv;
-    int commpipe[2];// This holds the fd for the input & output of the pipe  Setup communication pipeline first 
-    if (pipe(commpipe))
+    int commpipe1[2];// This holds the fd for the input & output of the pipe  Setup communication pipeline first 
+    if (pipe(commpipe1))
     {
         fprintf(stderr, "Pipe error!\n");
         exit(1);
@@ -77,24 +78,18 @@ void runPrograms()
     }
     if (pid)// A positive (non-negative) PID indicates the parent process
     {
-        dup2(commpipe[1], 1); // Replace stdout with out side of the pipe
-        close(commpipe[0]); // Close unused side of pipe (in side)
+        dup2(commpipe1[1], 1); // Replace stdout with out side of the pipe
+        close(commpipe1[0]); // Close unused side of pipe (in side)
         setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
-        sleep(2);
-        printf("Hello\n");
-        sleep(2);
-        printf("Goodbye\n");
-        sleep(2);
-        printf("exit\n");
-        wait(&rv);// Wait for child process to end
-        fprintf(stderr, "Child exited with a %d value\n", rv); 
+        fprintf(stdout,);
+        wait(&rv);
     }
     else// A zero PID indicates that this is the child process 
     {
-        dup2(commpipe[0], 0); // Replace stdin with the in side of the pipe
-        close(commpipe[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
+        dup2(commpipe1[0], 0); // Replace stdin with the in side of the pipe
+        close(commpipe1[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
         {
-        if (execl("./A", "./A", NULL) == -1)
+        if (execl("A", "A", NULL) == -1)
             fprintf(stderr, "execl Error!");
             exit(1);
         }
