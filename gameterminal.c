@@ -94,7 +94,7 @@ void runPrograms()
         dup2(commpipe[0], 0); // Replace stdin with the in side of the pipe
         close(commpipe[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
         {
-        if (execl("child", "child", NULL) == -1)
+        if (execl("./A", "./A", NULL) == -1)
             fprintf(stderr, "execl Error!");
             exit(1);
         }
