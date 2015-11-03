@@ -64,8 +64,8 @@ void runPrograms()
 {
     pid_t pid;
     int rv;
-    int commpipe[2];
-    if (pipe(commpipe))// This holds the fd for the input & output of the pipe  Setup communication pipeline first 
+    int commpipe[2];// This holds the fd for the input & output of the pipe  Setup communication pipeline first 
+    if (pipe(commpipe))
     {
         fprintf(stderr, "Pipe error!\n");
         exit(1);
@@ -75,26 +75,26 @@ void runPrograms()
         fprintf(stderr, "Fork error. Exiting.\n");
         exit(1); // something went wrong
     }
-    if (pid)
+    if (pid)// A positive (non-negative) PID indicates the parent process
     {
-        dup2(commpipe[1], 1); // A positive (non-negative) PID indicates the parent process
-        close(commpipe[0]); // Replace stdout with out side of the pipe
-        setvbuf(stdout, (char*) NULL, _IONBF, 0); // Close unused side of pipe (in side)
-        sleep(2); // Set non-buffered output on stdout
+        dup2(commpipe[1], 1); // Replace stdout with out side of the pipe
+        close(commpipe[0]); // Close unused side of pipe (in side)
+        setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
+        sleep(2);
         printf("Hello\n");
         sleep(2);
         printf("Goodbye\n");
         sleep(2);
         printf("exit\n");
-        wait(&rv);
-        fprintf(stderr, "Child exited with a %d value\n", rv); // Wait for child process to end
+        wait(&rv);// Wait for child process to end
+        fprintf(stderr, "Child exited with a %d value\n", rv); 
     }
-    else
+    else// A zero PID indicates that this is the child process 
     {
-        dup2(commpipe[0], 0); // A zero PID indicates that this is the child process 
-        close(commpipe[1]); // Replace stdin with the in side of the pipe
-        if (execl("child", "child", NULL) == -1)// Close unused side of pipe (out side) Replace the child fork with a new process
+        dup2(commpipe[0], 0); // Replace stdin with the in side of the pipe
+        close(commpipe[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
         {
+        if (execl("child", "child", NULL) == -1)
             fprintf(stderr, "execl Error!");
             exit(1);
         }
