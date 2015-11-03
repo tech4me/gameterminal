@@ -28,7 +28,7 @@ int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 
     if (checkFile())
     {
-        //runPrograms();
+        runPrograms();
     }
     else
         printf("Not able to find executables 'A' and 'B',exiting!\n");
