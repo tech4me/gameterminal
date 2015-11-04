@@ -81,7 +81,7 @@ void runPrograms()
         dup2(commpipe1[1], 1); // Replace stdout with out side of the pipe
         close(commpipe1[0]); // Close unused side of pipe (in side)
         setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
-        fprintf(stdout,);
+        fprintf(stdout,"ab");
         wait(&rv);
     }
     else// A zero PID indicates that this is the child process 
