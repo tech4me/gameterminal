@@ -95,3 +95,97 @@ void runPrograms()
         }
     }
 }
+
+int pfork(int);
+
+int main(void) {
+    int parentA[2];// This holds the fd for the input & output of the pipe  Setup communication pipeline first 
+    int childA[2];
+    
+    int parentB[2];
+    int childB[2];
+    
+    char buff[50];
+    
+    if (pipe(parentA) || pipe(childB) || pipe(parentA) ||pipe(childB) )
+    {
+        fprintf(stderr, "Pipe error!\n");
+        exit(1);
+    }
+    
+    int i;
+    i = pfork(3);
+    
+    if (i == 0)// A positive (non-negative) PID indicates the parent process    // parent
+    {
+        const char love[] = "love your sons!\n";
+        
+        int inA, outA;
+        inA = parentA[0];
+        outA = childA[1];
+        
+        int inB, outB;
+        inB = parentB[0];
+        outB = childB[1];
+        
+        
+        
+        read (inA, buff, 50);
+        write (outB, buff,strlen(buff) + 1);
+        
+        /*dup2(commpipeAParent[0], 0); // Replace stdin with the in side of the pipe
+        close(commpipeAParent[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
+        {
+        if (execl("A", "A", NULL) == -1)
+            fprintf(stderr, "execl Error!");
+            exit(1);
+        }*/
+    } else if (i==1)    // child A
+     // A zero PID indicates that this is the child process 
+    {
+        char const hi[] = "hi\n";
+        
+        int in, out;
+        in = childA[0];
+        out = parentA[1];
+        
+      
+        write (out,hi,strlen(hi)+1);
+        //read(in, buff, 50);
+        
+       /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
+        close(commpipeAParent[0]); // Close unused side of pipe (in side)
+        setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
+        fprintf(stdout,);
+        wait(&rv);
+    */
+    } else if (i==2) {  // child B
+        char const hi[] = "Not\n";
+        
+        int in, out;
+        in = childB[0];
+        out = parentB[1];
+        
+        read(in, buff, 50);
+       // write(out, hi, strlen(hi)+1)
+        printf("%s",buff);
+        
+    }
+    
+    
+    return 0;
+}
+
+int pfork(int x)
+{
+        int j;
+        for(j=1;j<x;j++)
+        {
+                if(fork()==0)
+                {
+                    //sleep(3);
+                    return j;
+                }
+        }
+        return 0;
+}
