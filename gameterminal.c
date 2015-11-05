@@ -89,7 +89,6 @@ void runPrograms()
 
     if ( i == 0 )    // A positive (non-negative) PID indicates the parent process    // parent
     {
-        const char love[] = "love your sons!\n";
         setvbuf(stdout, (char*) NULL, _IONBF, 0);
         int inA, outA;
         inA = parentA[0];
@@ -104,8 +103,8 @@ void runPrograms()
         close(childB[0]);
 
         sleep(1);
-        write(outA, "abc", 4);
-        write(outB, "def", 4);
+        write(outA, "abc\n", 4);
+        write(outB, "def\n", 4);
         read (inA, buffA, 50);
         read (inB, buffB, 50);
         printf("%s%s\n", buffA, buffB);
@@ -134,7 +133,7 @@ void runPrograms()
         //write (out,hi,strlen(hi)+1);
         //read(in, buff, 50);
         char temp[50];
-        //scanf("%s",temp);
+        scanf("%s", temp);
         printf("%s", temp);
 
         /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
@@ -155,7 +154,7 @@ void runPrograms()
         //read(in, buff, 50);
         // write(out, hi, strlen(hi)+1)
         char temp[50];
-        //scanf("%s",temp);
+        scanf("%s", temp);
         printf("%s", temp);
 
     }
