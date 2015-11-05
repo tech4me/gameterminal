@@ -31,7 +31,7 @@ int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 
     if ( checkFile())
     {
-        runPrograms(colourA,colourB,n);
+        runPrograms(colourA,colourB,boardSize);
     }
     else
         printf("Not able to find executables 'A' and 'B',exiting!\n");
@@ -102,8 +102,8 @@ void runPrograms(char colourA,char colourB,int n)
         close(parentB[1]);
         close(childB[0]);
 
-        write(outA, colourA, 50);
-        write(outB, colourB, 50);
+        write(outA, &colourA, 50);
+        write(outB, &colourB, 50);
         sleep(1);
         read (inA, buffA, 50);
         read (inB, buffB, 50);
