@@ -102,9 +102,9 @@ void runPrograms()
         close(parentB[1]);
         close(childB[0]);
 
+        //write(outA, "abc\n", 50);
+        //write(outB, "def\n", 50);
         sleep(1);
-        write(outA, "abc\n", 4);
-        write(outB, "def\n", 4);
         read (inA, buffA, 50);
         read (inB, buffB, 50);
         printf("%s%s\n", buffA, buffB);
@@ -132,10 +132,13 @@ void runPrograms()
         dup2(out, 1);
         //write (out,hi,strlen(hi)+1);
         //read(in, buff, 50);
-        char temp[50];
-        scanf("%s", temp);
-        printf("%s", temp);
+        //char temp[50];
+        //scanf("%s", temp);
+        //printf("%s", temp);
 
+        if (execl("A", "A", NULL) == -1)
+        fprintf(stderr, "A execl Error!\n");
+        exit(1);
         /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
            close(commpipeAParent[0]); // Close unused side of pipe (in side)
            setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
@@ -153,10 +156,13 @@ void runPrograms()
         dup2(out, 1);
         //read(in, buff, 50);
         // write(out, hi, strlen(hi)+1)
-        char temp[50];
-        scanf("%s", temp);
-        printf("%s", temp);
+        //char temp[50];
+        //scanf("%s", temp);
+        //printf("%s", temp);
 
+        if (execl("B", "B", NULL) == -1)
+        fprintf(stderr, "B execl Error!\n");
+        exit(1);
     }
 
 

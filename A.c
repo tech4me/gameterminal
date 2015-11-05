@@ -2,6 +2,6 @@
 
 int main()
 {
-    printf("Child Process\n");
+    printf("Child Process A \n");
     return 0;
 }
