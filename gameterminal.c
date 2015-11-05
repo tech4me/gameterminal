@@ -18,7 +18,7 @@
 
 int pfork(int x);
 bool checkFile();
-void runPrograms();
+void runPrograms(char colourA,char colourB,int n);
 
 int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 {
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 
     if ( checkFile())
     {
-        runPrograms();
+        runPrograms(colourA,colourB,n);
     }
     else
         printf("Not able to find executables 'A' and 'B',exiting!\n");
@@ -63,7 +63,7 @@ bool checkFile(void)
         return false;
 }
 
-void runPrograms()
+void runPrograms(char colourA,char colourB,int n)
 {
     char a;
     pid_t pid;
@@ -102,8 +102,8 @@ void runPrograms()
         close(parentB[1]);
         close(childB[0]);
 
-        //write(outA, "abc\n", 50);
-        //write(outB, "def\n", 50);
+        write(outA, colourA, 50);
+        write(outB, colourB, 50);
         sleep(1);
         read (inA, buffA, 50);
         read (inB, buffB, 50);
