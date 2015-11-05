@@ -1,7 +1,9 @@
-#include <stdio.h> 
+#include <stdio.h>
 
 int main()
 {
-    printf("Child Process A \n");
+    char colour;
+    scanf(" %c",&colour);
+    printf("I am B. I play %c. \n",colour);
     return 0;
 }

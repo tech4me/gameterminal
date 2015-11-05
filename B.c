@@ -2,6 +2,8 @@
 
 int main()
 {
-    printf("Child Process B \n");
+    char colour;
+    scanf(" %c",&colour);
+    printf("I am B. I play %c. \n",colour);
     return 0;
 }
