@@ -18,7 +18,9 @@
 
 int pfork(int x);
 bool checkFile();
-void runPrograms(char colourA,char colourB,int n);
+void runPrograms(char colourA, char colourB, int n);
+int readInA (int boardSize, char colour, char *buffer, char *temp, int *outB, int *outA);
+int readInB (int boardSize, char colour, char *buffer, char *temp, int *outA, int *outB);
 
 int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 {
@@ -31,7 +33,7 @@ int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 
     if ( checkFile())
     {
-        runPrograms(colourA,colourB,boardSize);
+        runPrograms(colourA, colourB, boardSize);
     }
     else
         printf("Not able to find executables 'A' and 'B',exiting!\n");
@@ -63,7 +65,7 @@ bool checkFile(void)
         return false;
 }
 
-void runPrograms(char colourA,char colourB,int n)
+void runPrograms(char colourA, char colourB, int n)
 {
     char a;
     pid_t pid;
@@ -109,14 +111,28 @@ void runPrograms(char colourA,char colourB,int n)
         read (inB, buffB, 50);
         printf("%s%s\n", buffA, buffB);
         //write (outB, buff,strlen(buff) + 1);
-
-        /*dup2(commpipeAParent[0], 0); // Replace stdin with the in side of the pipe
-           close(commpipeAParent[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
-           {
-           if (execl("A", "A", NULL) == -1)
-           fprintf(stderr, "execl Error!");
-           exit(1);
-           }*/
+        int result, counter;
+        if ( colourA == 'B' )
+            counter = 1;
+        else
+            counter = 2;
+        char buffer[100];
+        do
+        {
+            result = 2;
+            if( counter % 2 != 0 )
+            {
+                read(inA, buffer, 100);
+                result = readInA (n, colourA, buffer, &outB, &outA);
+            }
+            else
+            {
+                read(inB, buffer, 100);
+                readInB (n, colourB, buffer, &outA, &outB);
+            }
+            counter++;
+        } while( result != 1 || result != 0 || result != -1 );
+        printf("%d", result);
     }
     else if ( i == 1 )            // child A
     // A zero PID indicates that this is the child process
@@ -136,8 +152,8 @@ void runPrograms(char colourA,char colourB,int n)
         //scanf("%s", temp);
         //printf("%s", temp);
 
-        if (execl("A", "A", NULL) == -1)
-        fprintf(stderr, "A execl Error!\n");
+        if ( execl("A", "A", NULL) == -1 )
+            fprintf(stderr, "A execl Error!\n");
         exit(1);
         /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
            close(commpipeAParent[0]); // Close unused side of pipe (in side)
@@ -160,8 +176,8 @@ void runPrograms(char colourA,char colourB,int n)
         //scanf("%s", temp);
         //printf("%s", temp);
 
-        if (execl("B", "B", NULL) == -1)
-        fprintf(stderr, "B execl Error!\n");
+        if ( execl("B", "B", NULL) == -1 )
+            fprintf(stderr, "B execl Error!\n");
         exit(1);
     }
 
@@ -180,4 +196,75 @@ int pfork(int x)
         }
     }
     return 0;
+}
+
+int readInA (int boardSize, char colour, char *buffer, int *outB, int *outA )    // A wins = 1, B wins = -1, Draw = 0
+{
+    int boardSize;
+    char colour;
+    char temp[2];
+    if ( buffer[25] == ':' )
+    {
+        write (*outA, &boardSize, 3);    // CHANGE '3'
+    }
+    else if ( buffer[21] == ':' )
+    {
+        write (*outA, &colour, 3);    // CHANGE '3'
+    }
+    /*else if ( buffer[32] == ':' )
+    {
+        temp[0] = buffer[34];
+        temp[1] = buffer[35];
+        write(*outB, temp, 2);
+    }*/
+    else if (( buffer[18] == 'a' ) && ( buffer[19] == 't' ))
+    {
+        temp[0] = buffer[21];
+        temp[1] = buffer[22];
+        write(*outB, temp, 2);
+    }
+    else if ( buffer[13] == '.' )
+    {
+        if ( buffer[0] == colour )
+            return 1;    // Program A wins
+        else
+            return -1;    // Program B wins
+    }
+    else if ( buffer[4] == '!' )
+    {
+        return 0;    // Draw
+    }
+
+}
+
+// Have a loop outside of readIn()
+
+
+
+int readInB (int boardSize, char colour, char *buffer, int *outA, int *outB)
+{
+    int boardSize;
+    char colour;
+    char temp[2];
+    if ( buffer[25] == ':' )
+    {
+        write (outB, &boardSize, 3);    // CHANGE '3'
+    }
+    else if ( buffer[21] == ':' )
+    {
+        write (outB, &colour, 3);    // CHANGE '3'
+    }
+    /*else if ( buffer[32] == ':' )
+    {
+        temp[2];
+        temp[0] = buffer[34];
+        temp[1] = buffer[35];
+        write(*outA, temp, 2);
+    }*/
+    else if (( buffer[18] == 'a' ) && ( buffer[19] == 't' ))
+    {
+        temp[0] = buffer[21];
+        temp[1] = buffer[22];
+        write(*outA, temp, 2);
+    }
 }
