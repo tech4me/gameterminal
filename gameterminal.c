@@ -19,8 +19,8 @@
 int pfork(int x);
 bool checkFile();
 void runPrograms(char colourA, char colourB, int n);
-int readInA (int boardSize, char colour, char *buffer, char *temp, int *outB, int *outA);
-int readInB (int boardSize, char colour, char *buffer, char *temp, int *outA, int *outB);
+int readInA (int boardSize, char colour, char *buffer, int *outB, int *outA);
+int readInB (int boardSize, char colour, char *buffer, int *outA, int *outB);
 
 int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 {
@@ -200,8 +200,6 @@ int pfork(int x)
 
 int readInA (int boardSize, char colour, char *buffer, int *outB, int *outA )    // A wins = 1, B wins = -1, Draw = 0
 {
-    int boardSize;
-    char colour;
     char temp[2];
     if ( buffer[25] == ':' )
     {
@@ -243,16 +241,14 @@ int readInA (int boardSize, char colour, char *buffer, int *outB, int *outA )   
 
 int readInB (int boardSize, char colour, char *buffer, int *outA, int *outB)
 {
-    int boardSize;
-    char colour;
     char temp[2];
     if ( buffer[25] == ':' )
     {
-        write (outB, &boardSize, 3);    // CHANGE '3'
+        write (*outB, &boardSize, 3);    // CHANGE '3'
     }
     else if ( buffer[21] == ':' )
     {
-        write (outB, &colour, 3);    // CHANGE '3'
+        write (*outB, &colour, 3);    // CHANGE '3'
     }
     /*else if ( buffer[32] == ':' )
     {
