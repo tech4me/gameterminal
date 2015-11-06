@@ -76,9 +76,6 @@ void runPrograms(char colourA, char colourB, int n)
     int parentB[2];
     int childB[2];
 
-    char buffA[50];
-    char buffB[50];
-
 
     if ( pipe(parentA) || pipe(childA) || pipe(parentB) || pipe(childB) )
     {
@@ -104,12 +101,8 @@ void runPrograms(char colourA, char colourB, int n)
         close(parentB[1]);
         close(childB[0]);
 
-        write(outA, &colourA, 50);
-        write(outB, &colourB, 50);
-        sleep(1);
-        read (inA, buffA, 50);
-        read (inB, buffB, 50);
-        printf("%s%s\n", buffA, buffB);
+
+
         //write (outB, buff,strlen(buff) + 1);
         int result, counter;
         if ( colourA == 'B' )
