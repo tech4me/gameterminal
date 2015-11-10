@@ -1,15 +1,3 @@
-/*
- * File:   main.c
- * Author: tech4me
- * Description: A program that takes two board game programs and execicute them
- * find the winner.(Have program "A" and "B" under the same directory as this
- * program.)
- *
- */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <inttypes.h>
 #include <dirent.h>
@@ -18,276 +6,166 @@
 
 int pfork(int x);
 bool checkFile();
-void runPrograms(char colourA, char colourB, int n);
-int readInA (int boardSize, char colour, char *bufferA, int *outB, int *outA);
-int readInB (int boardSize, char colour, char *bufferB, int *outA, int *outB);
+void runPrograms(char colourA,char colourB,int n);
 
 int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 {
-	int boardSize;
-	char* endPtr;
-	boardSize = strtoimax(argv[1], &endPtr, 10);
-	char colourA, colourB;
-	colourA = *argv[2];
-	colourB = *( argv[2] + 1 );
+    int boardSize;
+    char* endPtr;
+    boardSize = strtoimax(argv[1], &endPtr, 10);
+    char colourA, colourB;
+    colourA = *argv[2];
+    colourB = *( argv[2] + 1 );
 
-	if ( checkFile())
-	{
-		runPrograms(colourA, colourB, boardSize);
-	}
-	else
-		printf("Not able to find executables 'A' and 'B',exiting!\n");
-	return ( EXIT_SUCCESS );
+    if ( checkFile())
+    {
+        runPrograms(colourA,colourB,boardSize);
+    }
+    else
+        printf("Not able to find executables 'A' and 'B',exiting!\n");
+    return ( EXIT_SUCCESS );
 }
 
 bool checkFile(void)
 {
-	int counter = 0;
-	DIR *d;
-	struct dirent *dir;
-	d = opendir(".");
-	if ( d )
-	{
-		while (( dir = readdir(d)) != NULL )
-		{
-			if ( dir->d_type == DT_REG )
-			{
-				if (( *( dir->d_name ) == 'A' || *( dir->d_name ) == 'B' ) && ( *( dir->d_name + 1 ) != '.' ))
-					counter++;
-				//printf("%s\n", dir->d_name);
-			}
-		}
-		closedir(d);
-	}
-	if ( counter == 2 )
-		return true;
-	else
-		return false;
+    int counter = 0;
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if ( d )
+    {
+        while (( dir = readdir(d)) != NULL )
+        {
+            if ( dir->d_type == DT_REG )
+            {
+                if (( *( dir->d_name ) == 'A' || *( dir->d_name ) == 'B' ) && ( *( dir->d_name + 1 ) != '.' ))
+                    counter++;
+                //printf("%s\n", dir->d_name);
+            }
+        }
+        closedir(d);
+    }
+    if ( counter == 2 )
+        return true;
+    else
+        return false;
 }
 
-void runPrograms(char colourA, char colourB, int n)
+void runPrograms(char colourA,char colourB,int n)
 {
-	char a;
-	pid_t pid;
-	int rv;
-	int parentA[2];    // The four pipes
-	int childA[2];
+    char a;
+    pid_t pid;
+    int rv;
+    int parentA[2];    // The four pipes
+    int childA[2];
 
-	int parentB[2];
-	int childB[2];
-	char bufferA[100]={0};
-	char bufferB[100] = {0};
-	int result, counter;
-	if ( pipe(parentA) || pipe(childA) || pipe(parentB) || pipe(childB) )
-	{
-		fprintf(stderr, "Pipe error!\n");
-		exit(1);
-	}
+    int parentB[2];
+    int childB[2];
 
-	int i;
-	i = pfork(3);
-
-	if ( i == 0 )    // A positive (non-negative) PID indicates the parent process    // parent
-	{
-		setvbuf(stdout, (char*) NULL, _IONBF, 0);
-		int inA, outA;
-		inA = parentA[0];
-		outA = childA[1];
-		close(parentA[1]);
-		close(childB[0]);
-
-		int inB, outB;
-		inB = parentB[0];
-		outB = childB[1];
-		close(parentB[1]);
-		close(childB[0]);
+    char buffA[50];
+    char buffB[50];
 
 
+    if ( pipe(parentA) || pipe(childA) || pipe(parentB) || pipe(childB) )
+    {
+        fprintf(stderr, "Pipe error!\n");
+        exit(1);
+    }
 
-		//write (outB, buff,strlen(buff) + 1);
-		if ( colourA == 'B' )
-			counter = 1;
-		else
-			counter = 2;
+    int i;
+    i = pfork(3);
 
-		//  do
-		//  {
-		//		memset(bufferA,0,strlen(bufferA));
-		//	memset(bufferB,0,strlen(bufferB));
+    if ( i == 0 )    // A positive (non-negative) PID indicates the parent process    // parent
+    {
+        setvbuf(stdout, (char*) NULL, _IONBF, 0);
+        int inA, outA;
+        inA = parentA[0];
+        outA = childA[1];
+        close(parentA[1]);
+        close(childB[0]);
 
-		   		//     if( counter % 2 != 0 )
-		//     {	
-	//	do {
-		//  result = 2;
+        int inB, outB;
+        inB = parentB[0];
+        outB = childB[1];
+        close(parentB[1]);
+        close(childB[0]);
 
-		//	if (counter%2 != 0) {
-		char bufferT[5] = {0};
-			bufferT[0] = '5';
+        write(outA, &colourA, 50);
+        write(outB, &colourB, 50);
+       // sleep(1);
+      //  read (inA, buffA, 50);
+        read (inB, buffB, 50);
+        printf("%s\n", buffB);
+        //write (outB, buff,strlen(buff) + 1);
 
-				write(outA, bufferT, 5);
-		read(inA, bufferA, 100);
-							
-				//printf("%d\n",x);
-				printf("%s\n", bufferA);   
-			          
-			//	result = readInA (n, colourA, bufferA, &outB, &outA);
-		//	}
-			//	}while(50!=1);
+        /*dup2(commpipeAParent[0], 0); // Replace stdin with the in side of the pipe
+           close(commpipeAParent[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
+           {
+           if (execl("A", "A", NULL) == -1)
+           fprintf(stderr, "execl Error!");
+           exit(1);
+           }*/
+    }
+    else if ( i == 1 )            // child A
+    // A zero PID indicates that this is the child process
+    {
+        setvbuf(stdout, (char*) NULL, _IONBF, 0);
+        int in, out;
+        in = childA[0];
+        out = parentA[1];
+        close(childA[1]);
+        close(parentA[0]);
 
+        dup2(in, 0);
+        dup2(out, 1);
+        //write (out,hi,strlen(hi)+1);
+        //read(in, buff, 50);
+        //char temp[50];
+        //scanf("%s", temp);
+        //printf("%s", temp);
 
-		//else
-		//{
-		//	read(inB, bufferB, 100);
-		//	//	printf("%s\n",bufferB);
-//
-//			readInB (n, colourB, bufferB, &outA, &outB);
-	//	}
-	//	counter++;
-//	} while( result != 1 || result != 0 || result != -1 );
-		//printf("%d", result);
-	}
-	else if ( i == 1 )            // child A
-		// A zero PID indicates that this is the child process
-	{
-		setvbuf(stdout, (char*) NULL, _IONBF, 0);
-		int in, out;
-		in = childA[0];
-		out = parentA[1];
-		close(childA[1]);
-		close(parentA[0]);
-
-		dup2(in, 0);
-		dup2(out, 1);
-		//write (out,hi,strlen(hi)+1);
-		//read(in, buff, 50);
-		//char temp[50];
-		//	sleep(1);
-		if ( execl("A", "A", NULL) == -1 )
-			fprintf(stderr, "A execl Error!\n");
-		exit(1);
-		/* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
-		   close(commpipeAParent[0]); // Close unused side of pipe (in side)
-		   setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
-		   */
-	}
-	else if ( i == 2 )              // child B
-	{
-		setvbuf(stdout, (char*) NULL, _IONBF, 0);
-		int in, out;
-		in = childB[0];
-		out = parentB[1];
-		close(childB[1]);
-		close(parentB[0]);
-		dup2(in, 0);
-		dup2(out, 1);
-		//read(in, buff, 50);
-		// write(out, hi, strlen(hi)+1)
-		//char temp[50];
-		//scanf("%s", temp);
-		//printf("%s", temp);
-
-		if ( execl("B", "B", NULL) == -1 )
-			fprintf(stderr, "B execl Error!\n");
-		exit(1);
-	}
-
-
-	}
-
-	int pfork(int x)
-	{
-		int j;
-		for( j = 1; j < x; j++ )
-		{
-			if( fork() == 0 )
-			{
-				//sleep(3);
-				return j;
-			}
-		}
-		return 0;
-	}
-
-	int readInA (int boardSize, char colour, char *bufferA, int *outB, int *outA )    // A wins = 1, B wins = -1, Draw = 0
-	{
-		char temp[2];
-		if ( bufferA[25] == ':' )
-		{
-			char dim = '4';
-			char enter = (char)13;
-		//	printf("A\n");
-			write (*outA, &dim, 1);    // CHANGE '3'
-	//		write(*outA, &enter,1);
-//printf("%d",boardSize);
-		}
-		else if ( bufferA[21] == ':' )
-		{
-			write (*outA, &colour, 1);    // CHANGE '3'
-			printf("%c",colour);
-		}
-		/*else if ( buffer[32] == ':' )
-		  {
-		  temp[0] = buffer[34];
-		  temp[1] = buffer[35];
-		  write(*outB, temp, 2);
-		  }*/
-		else if (( bufferA[18] == 'a' ) && ( bufferA[19] == 't' ))
-		{
-			temp[0] = bufferA[21];
-			temp[1] = bufferA[22];
-			write(*outB, temp, 2);
-			printf("%s",temp);
-		}
-		else if ( bufferA[13] == '.' )
-		{
-			if ( bufferA[0] == colour )
-				return 1;    // Program A wins
-			else
-				return -1;    // Program B wins
-		}
-		else if ( bufferA[4] == '!' )
-		{
-			return 0;    // Draw
-		}
-
-	}
-
-	// Have a loop outside of readIn()
+        if (execl("A", "A", NULL) == -1)
+        fprintf(stderr, "A execl Error!\n");
+        exit(1);
+        /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
+           close(commpipeAParent[0]); // Close unused side of pipe (in side)
+           setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
+         */
+    }
+    else if ( i == 2 )              // child B
+    {
+        setvbuf(stdout, (char*) NULL, _IONBF, 0);
+        int in, out;
+        in = childB[0];
+        out = parentB[1];
+        close(childB[1]);
+        close(parentB[0]);
+        dup2(in, 0);
+        dup2(out, 1);
+        //read(in, buff, 50);
+        // write(out, hi, strlen(hi)+1)
+        //char temp[50];
+        //scanf("%s", temp);
+        //printf("%s", temp);
+	printf("I LOVE YOU!");
+     //   if (execl("B", "B", NULL) == -1)
+      // fprintf(stderr, "B execl Error!\n");
+       // exit(1);
+    }
 
 
+}
 
-	int readInB (int boardSize, char colour, char *bufferB, int *outA, int *outB)
-	{
-		char temp[3];
-		if ( bufferB[25] == ':' )
-		{
-			char enter=(char)13;
-			char dim='4';
-		//	printf("B\n");
-			write (*outB, &dim, 1);    // CHANGE '3'
-		//write(*outA, &enter,1);
-
-		//	printf("%d",boardSize);
-		}
-		else if ( bufferB[21] == ':' )
-		{
-			
-			write (*outB, &colour, 1);
-			printf("%c", colour);
-		}
-		/*else if ( buffer[32] == ':' )
-		  {
-		  temp[2];
-		  temp[0] = buffer[34];
-		  temp[1] = buffer[35];
-		  write(*inA, temp, 2);
-		  }*/
-		else if (( bufferB[18] == 'a' ) && ( bufferB[19] == 't' ))
-		{
-			temp[0] = bufferB[21];
-			temp[1] = bufferB[22];
-		//	temp[2] = '\n';
-			write(*outA, temp, 2);
-			printf("%s",temp);
-		}
-	}
+int pfork(int x)
+{
+    int j;
+    for( j = 1; j < x; j++ )
+    {
+        if( fork() == 0 )
+        {
+            //sleep(3);
+            return j;
+        }
+    }
+    return 0;
+}
