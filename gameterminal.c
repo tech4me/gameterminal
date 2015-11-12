@@ -3,27 +3,27 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int pfork(int x);
 bool checkFile();
-void runPrograms(char colourA,char colourB,int n);
+void runPrograms(char colourA,char colourB, char n);
 
 int main(int argc, char* argv[])//"boardsize" "BW or WB" BW= AB BW | WB= AW BB
 {
-    int boardSize;
-    char* endPtr;
-    boardSize = strtoimax(argv[1], &endPtr, 10);
     char colourA, colourB;
     colourA = *argv[2];
     colourB = *( argv[2] + 1 );
 
     if ( checkFile())
     {
-        runPrograms(colourA,colourB,boardSize);
+        runPrograms(colourA,colourB,*(argv[1]));
     }
     else
         printf("Not able to find executables 'A' and 'B',exiting!\n");
-    return ( EXIT_SUCCESS );
+    return (EXIT_SUCCESS);
 }
 
 bool checkFile(void)
@@ -51,7 +51,7 @@ bool checkFile(void)
         return false;
 }
 
-void runPrograms(char colourA,char colourB,int n)
+void runPrograms(char colourA, char colourB,char n)
 {
     char a;
     pid_t pid;
@@ -62,8 +62,8 @@ void runPrograms(char colourA,char colourB,int n)
     int parentB[2];
     int childB[2];
 
-    char buffA[50];
-    char buffB[50];
+    char buffA[1000] ={0};
+    char buffB[1000] ={0};
 
 
     if ( pipe(parentA) || pipe(childA) || pipe(parentB) || pipe(childB) )
@@ -90,21 +90,76 @@ void runPrograms(char colourA,char colourB,int n)
         close(parentB[1]);
         close(childB[0]);
 
-        write(outA, &colourA, 50);
-        write(outB, &colourB, 50);
-       // sleep(1);
-      //  read (inA, buffA, 50);
-        read (inB, buffB, 50);
-        printf("%s\n", buffB);
-        //write (outB, buff,strlen(buff) + 1);
+		
+	char enter = '\n';
+	memset(buffA,0,strlen(buffA));
+	memset(buffB,0,strlen(buffB));
 
-        /*dup2(commpipeAParent[0], 0); // Replace stdin with the in side of the pipe
-           close(commpipeAParent[1]); // Close unused side of pipe (out side) Replace the child fork with a new process
-           {
-           if (execl("A", "A", NULL) == -1)
-           fprintf(stderr, "execl Error!");
-           exit(1);
-           }*/
+        read (inA, buffA, 1000);
+        read (inB, buffB, 1000);
+	printf("%s\n", buffA);
+//	printf("%s\n", buffB);
+
+
+	// write dimension
+	write(outA, &n, 1);
+	write(outA, &enter, 1);
+	write(outB, &n, 1);
+	write(outB, &enter, 1);
+
+	usleep(50);	
+
+	memset(buffA,0,strlen(buffA));
+	memset(buffB,0,strlen(buffB));
+        read (inA, buffA, 1000);
+        read (inB, buffB, 1000);
+	printf("%s\n", buffA);
+//	printf("%s\n", buffB);
+
+
+	// write colour
+	write(outA, &colourA, 1);
+	write(outA, &enter, 1);
+	write(outB, &colourB, 1);
+	write(outB, &enter, 1);
+
+	usleep(500);
+
+// LOOP
+	read(inA, buffA, 1000);
+	read(inB, buffB, 1000);
+	int winner = 3;	// undecided
+	while(winner == 3) {
+	if (buffB[67] == ':') {
+		char temp[3];
+		temp[0] = buffA[56];
+		temp[1] = buffA[57];
+		temp[2] = '\n';		
+		write(inB, temp, 3);
+		usleep(500);
+		memset(buffB,0,strlen(buffB));
+  		read (inB, buffB, 1000);
+
+	} 
+
+	if (buffA[67] == ':') {
+		char temp[3];
+		temp[0] = buffB[56];
+		temp[1] = buffB[57];
+		temp[2] = '\n';		
+		write(inA, temp, 3);
+		usleep(500);
+ 		memset(buffA,0,strlen(buffA));
+		read (inA, buffA, 1000);
+
+	}
+		printf("%s\n", buffA);
+		printf("%s\n", buffB);
+
+	}
+
+
+
     }
     else if ( i == 1 )            // child A
     // A zero PID indicates that this is the child process
@@ -118,19 +173,10 @@ void runPrograms(char colourA,char colourB,int n)
 
         dup2(in, 0);
         dup2(out, 1);
-        //write (out,hi,strlen(hi)+1);
-        //read(in, buff, 50);
-        //char temp[50];
-        //scanf("%s", temp);
-        //printf("%s", temp);
 
         if (execl("A", "A", NULL) == -1)
         fprintf(stderr, "A execl Error!\n");
         exit(1);
-        /* dup2(commpipeAParent[1], 1); // Replace stdout with out side of the pipe
-           close(commpipeAParent[0]); // Close unused side of pipe (in side)
-           setvbuf(stdout, (char*) NULL, _IONBF, 0);  // Set non-buffered output on stdout
-         */
     }
     else if ( i == 2 )              // child B
     {
@@ -142,15 +188,10 @@ void runPrograms(char colourA,char colourB,int n)
         close(parentB[0]);
         dup2(in, 0);
         dup2(out, 1);
-        //read(in, buff, 50);
-        // write(out, hi, strlen(hi)+1)
-        //char temp[50];
-        //scanf("%s", temp);
-        //printf("%s", temp);
-	printf("I LOVE YOU!");
-     //   if (execl("B", "B", NULL) == -1)
-      // fprintf(stderr, "B execl Error!\n");
-       // exit(1);
+
+        if (execl("B", "B", NULL) == -1)
+      		fprintf(stderr, "B execl Error!\n");
+        exit(1);
     }
 
 
